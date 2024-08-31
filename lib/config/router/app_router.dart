@@ -1,14 +1,14 @@
 import 'package:get/get.dart';
+import 'package:to_do_list_nocountry/home/pages/home_page.dart';
+import 'package:to_do_list_nocountry/onboarding/onepage.dart';
+import 'package:to_do_list_nocountry/splash/splash_page.dart';
 
 abstract class Routes {
   ///welcomer
   static const INITIAL = '/splash';
   static const ONBOARDING = '/onboarding';
-  static const INDEX = '/index';
-
   //
   static const HOME = '/home';
-  static const REGISTERANDLOGIN = '/registerandlogin';
 }
 
 class AppRouter {
@@ -16,7 +16,7 @@ class AppRouter {
     return [
       GetPage(name: Routes.INITIAL, page: () => SplashPage()),
       GetPage(name: Routes.ONBOARDING, page: () => OnePage()),
-      GetPage(name: Routes.INDEX, page: () => IndexPage()),
+      GetPage(name: Routes.HOME, page: () => HomePage()),
 
       //
     ];

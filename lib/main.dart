@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:to_do_list_nocountry/config/router/app_router.dart';
+import 'package:to_do_list_nocountry/config/themes/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,29 +14,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.config(
-        //enableLog: true,
-        defaultPopGesture: true,
-        defaultTransition: Transition.cupertino);
-
     return GetMaterialApp(
-      defaultTransition: Transition.fade,
-      opaqueRoute: Get.isOpaqueRouteDefault,
-      popGesture: Get.isPopGestureEnable,
-      title: 'Telemedicina',
-      debugShowCheckedModeBanner: false,
-      initialRoute:
-          INITIAL, // Asegúrate de definir las rutas inicialmente en una clase de rutas
-      initialBinding: BindingsBuilder(
-        () {
-          Get.put<AuthController>(AuthController());
-        },
-      ), // Utiliza AuthBinding que se crea para manejar dependencias
-      getPages: Routes
-          .routes, // Asegúrate de que las rutas estén bien definidas y asignadas en una clase estática
-      theme: AppTheme.lightTheme,
-      themeMode: ThemeMode.system,
-      darkTheme: AppTheme.darkTheme,
-    );
+        title: 'ToDoListNoCountry',
+        debugShowCheckedModeBanner: false,
+        getPages: AppRouter().getPages(),
+        //themeMode: ThemeMode.system,
+        theme: AppTheme().lightTheme,
+        //darkTheme: AppTheme().darkTheme,
+        initialRoute: Routes.INITIAL,
+        initialBinding: BindingsBuilder(
+          () {
+            //Get.put<AuthController>(AuthController());
+          },
+        ));
   }
 }
