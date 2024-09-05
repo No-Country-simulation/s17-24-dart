@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:to_do_list_nocountry/config/router/app_router.dart';
 import 'package:to_do_list_nocountry/config/themes/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
@@ -18,9 +19,10 @@ class MyApp extends StatelessWidget {
         title: 'ToDoListNoCountry',
         debugShowCheckedModeBanner: false,
         getPages: AppRouter().getPages(),
-        //themeMode: ThemeMode.system,
+        themeMode: ThemeMode.system,
+        //theme: AppTheme().lightTheme,
         theme: AppTheme().lightTheme,
-        //darkTheme: AppTheme().darkTheme,
+        darkTheme: AppTheme().darkTheme,
         initialRoute: Routes.INITIAL,
         initialBinding: BindingsBuilder(
           () {

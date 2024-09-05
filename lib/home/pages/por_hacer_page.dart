@@ -1,21 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:to_do_list_nocountry/home/structures/controllers/home_controller.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:to_do_list_nocountry/home/structures/controllers/theme_controller.dart';
 
-class PorHacerPage extends StatelessWidget {
+class PorHacerPage extends StatefulWidget {
+  @override
+  _PorHacerPageState createState() => _PorHacerPageState();
+}
+
+class _PorHacerPageState extends State<PorHacerPage> {
   final HomeController homeController = Get.put(HomeController());
+  final ThemeController themeController = Get.put(ThemeController());
   final TextEditingController _textController = TextEditingController();
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (status) => print('onStatus: $status'),
+        onError: (error) => print('onError: $error'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (result) {
+            setState(() {
+              _textController.text = result.recognizedWords;
+            });
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Por hacer',
-            style: TextStyle(color: Colors.white, fontSize: 25)),
-        backgroundColor: Colors.black,
+        title: const Text('Por hacer', style: TextStyle(fontSize: 25)),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.brightness_6),
+            onPressed: () {
+              themeController.switchTheme();
+            },
+          ),
+        ],
       ),
       body: Container(
-        color: Colors.black,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -28,26 +73,23 @@ class PorHacerPage extends StatelessWidget {
                     return GestureDetector(
                       onTap: () => _mostrarMenu(context, index, 'PorHacer'),
                       child: Card(
-                        color: Colors.grey[800],
+                        color: theme.cardColor,
                         child: ListTile(
                           title: Text(
                             note.text,
-                            style: const TextStyle(color: Colors.white),
+                            style: theme.textTheme.bodyMedium,
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon:
-                                    const Icon(Icons.edit, color: Colors.white),
+                                icon: Icon(Icons.edit),
                                 onPressed: () {
-                                  _textController.text =
-                                      note.text; // Set initial value
+                                  _textController.text = note.text;
                                   Get.defaultDialog(
                                     title: 'Editar nota',
-                                    titleStyle: const TextStyle(
-                                        color: Colors.white, fontSize: 18),
-                                    backgroundColor: Colors.grey[900],
+                                    titleStyle: theme.textTheme.bodyMedium,
+                                    backgroundColor: theme.cardColor,
                                     radius: 20,
                                     contentPadding: const EdgeInsets.all(16.0),
                                     content: Column(
@@ -57,14 +99,13 @@ class PorHacerPage extends StatelessWidget {
                                       children: [
                                         TextField(
                                           controller: _textController,
-                                          style: const TextStyle(
-                                              color: Colors.white),
+                                          style: theme.textTheme.bodyMedium,
                                           decoration: InputDecoration(
                                             hintText: 'Editar nota',
-                                            hintStyle: const TextStyle(
-                                                color: Colors.grey),
+                                            hintStyle: theme
+                                                .inputDecorationTheme.hintStyle,
                                             filled: true,
-                                            fillColor: Colors.grey[900],
+                                            fillColor: theme.cardColor,
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(8.0),
@@ -79,7 +120,7 @@ class PorHacerPage extends StatelessWidget {
                                                 .text.isNotEmpty) {
                                               homeController.editarTarea(
                                                   index, _textController.text);
-                                              Get.back(); // Close dialog
+                                              Get.back();
                                             }
                                           },
                                           child: const Text('Guardar'),
@@ -90,8 +131,7 @@ class PorHacerPage extends StatelessWidget {
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete,
-                                    color: Colors.white),
+                                icon: Icon(Icons.delete),
                                 onPressed: () {
                                   homeController.eliminarTarea(
                                       index, 'PorHacer');
@@ -111,12 +151,12 @@ class PorHacerPage extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: _textController,
-                    style: const TextStyle(color: Colors.white),
+                    style: theme.textTheme.bodyMedium,
                     decoration: InputDecoration(
                       hintText: 'Agregar nota',
-                      hintStyle: const TextStyle(color: Colors.grey),
+                      hintStyle: theme.inputDecorationTheme.hintStyle,
                       filled: true,
-                      fillColor: Colors.grey[900],
+                      fillColor: theme.cardColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                         borderSide: BorderSide.none,
@@ -125,6 +165,12 @@ class PorHacerPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8.0),
+                IconButton(
+                  icon: Icon(
+                    _isListening ? Icons.mic : Icons.mic_none,
+                  ),
+                  onPressed: _listen,
+                ),
                 ElevatedButton(
                   onPressed: () {
                     if (_textController.text.isNotEmpty) {
@@ -143,10 +189,12 @@ class PorHacerPage extends StatelessWidget {
   }
 
   void _mostrarMenu(BuildContext context, int index, String listaOrigen) {
+    final ThemeData theme = Theme.of(context);
+
     Get.defaultDialog(
       title: 'Mover nota a:',
-      titleStyle: const TextStyle(color: Colors.white, fontSize: 18),
-      backgroundColor: Colors.grey[900],
+      titleStyle: theme.textTheme.bodyMedium,
+      backgroundColor: theme.cardColor,
       radius: 20,
       contentPadding: const EdgeInsets.all(16.0),
       content: Column(
